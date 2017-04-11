@@ -3,8 +3,7 @@ Telegram-Purple Unofficial (Beta)
 
 Telegram-purple is a Libpurple protocol plugin that adds support for the Telegram messenger.
 
-I keep getting many questions about this plugin in my E-mail, so I've created a
-[telegram group chat](https://goo.gl/kuskUH) for
+I keep getting many questions about this plugin in my E-mail, so I've created a [telegram group chat] (https://goo.gl/VudXys) for
 telegram-purple related discussions or questions.
 
 Installation
@@ -17,7 +16,7 @@ If your platform is not supported or you want to contribute by testing or develo
 
 #### OSX (Adium)
 
-1. Download and execute the [Telegram-Adium bundle] (https://github.com/majn/telegram-purple/releases/download/v1.2.6/telegram-adium-1.2.6.AdiumLibpurplePlugin.zip)
+1. Download and execute the [Telegram-Adium bundle] (https://github.com/majn/telegram-purple/releases/download/v1.3.0/telegram-adium-1.3.0.AdiumLibpurplePlugin.zip)
 2. Restart Adium
 
 #### Windows
@@ -92,7 +91,7 @@ If the above works, then you should stop here: It is now installed.
 
 If the above fails: Don't worry, just continue building it by yourself. Next you need to install these dependencies:
 
-        sudo apt-get install libgcrypt20-dev libpurple-dev libwebp-dev gettext
+        sudo apt-get install libgcrypt20-dev libpurple-dev libwebp-dev gettext build-essential
 
 
 ##### OpenSUSE
@@ -266,14 +265,6 @@ and `.dsc` files, do this:
     false # Move tar to parent directory, by hand
     dpkg-source -b .
 
-1.3.0
------
-
-- channel/supergroup support
-- support sending code tags in markdown "backtick" format (see README for example)
-- reduce amount of file-transfer popups in Pidgin, auto-load media in the background
-- fix stability issues for the win32 build
-- fix multiple crashes in libtgl
 
 Discussion / Help
 -----------------
@@ -303,7 +294,7 @@ FAQ
 
 Telegram group chat for telegram-purple or libtgl related discussions or questions:
 
-    - https://goo.gl/QHttTR
+    - https://goo.gl/VudXys
 
 
 Submitting Bug Reports

@@ -22,7 +22,7 @@
 // load photo
 
 static void tgp_info_update_photo_id (PurpleBlistNode *node, long long photo) {
-  char *llid = g_strdup_printf ("%lld", photo);
+  char *llid = g_strdup_printf ("%" G_GINT64_FORMAT, photo);
   debug ("tgp_info_update_photo_id %s", llid);
   purple_blist_node_set_string (node, TGP_INFO_PHOTO_ID, llid);
   g_free (llid);
@@ -76,7 +76,7 @@ void tgp_info_update_photo (PurpleBlistNode *node, tgl_peer_t *P) {
     }
   }
 
-  if (photo != 0) {
+  if (photo != 0 && pbn_get_data (node) != NULL) {  // FIXME: Monkey-patched condition, I have no idea why this is NULL sometimes.
     tgl_do_load_file_location (pbn_get_data (node)->TLS, &P->user.photo_big, tgp_info_load_photo_done, P);
   } else {
     // set empty photo

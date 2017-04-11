@@ -48,7 +48,7 @@ tgl_peer_id_t tgp_chat_get_id (PurpleChat *C) {
 }
 
 void tgp_chat_set_last_server_id (struct tgl_state *TLS, tgl_peer_id_t chat, int id) {
-  info ("setting channel message server_id=%", id);
+  info ("setting channel message server_id=d%", id);
 
   char *key = g_strdup_printf ("last-server-id/%d", tgl_get_peer_id (chat));
   purple_account_set_int (tls_get_pa (TLS), key, id);
@@ -218,6 +218,63 @@ int tgprpl_send_chat (PurpleConnection *gc, int id, const char *message, PurpleM
   return tgp_msg_send (gc_get_tls (gc), message, P->id);
 }
 
+unsigned int tgprpl_send_chat_typing (PurpleConversation *conv, PurpleTypingState typing, gpointer ignored)
+{
+  PurpleConnection *gc = purple_conversation_get_gc (conv);
+  tgl_peer_t *P;
+  PurpleConvChat *chat;
+  int id;
+
+  if (!PURPLE_CONNECTION_IS_CONNECTED (gc))
+    return 0;
+
+  if (g_strcmp0(purple_plugin_get_id (purple_connection_get_prpl (gc)), PLUGIN_ID))
+    return 0;
+  
+  debug ("tgprpl_send_chat_typing()");
+  
+  chat = purple_conversation_get_chat_data (conv);
+  id = purple_conv_chat_get_id (chat);
+  
+  P = tgl_peer_get (gc_get_tls (gc), TGL_MK_CHAT(id));
+  if (! P) {
+    P = tgl_peer_get (gc_get_tls (gc), TGL_MK_CHANNEL(id));
+  }
+  g_return_val_if_fail(P != NULL, -1);
+  
+  tgl_do_send_typing (gc_get_tls (gc), P->id, typing == PURPLE_TYPING ? tgl_typing_typing : tgl_typing_cancel,
+        0, 0);
+
+  // when the group receives a typing notification it is obvious that the previous messages were read
+  pending_reads_send_user (gc_get_tls (gc), P->id);
+  
+  return 2;
+}
+
+void update_chat_typing (struct tgl_state *TLS, struct tgl_user *U, struct tgl_chat *C, enum tgl_typing_status status) {
+  debug ("update_chat_typing()");
+  
+  PurpleConvChat *chat = NULL;
+  PurpleConversation *conv = purple_find_chat (tls_get_conn (TLS), tgl_get_peer_id (C->id));
+  if (conv) {
+    chat = purple_conversation_get_chat_data (conv);
+  }
+  g_return_if_fail(chat != NULL);
+  
+  const char *name = tgp_blist_lookup_purple_name (TLS, U->id);
+  g_return_if_fail(name != NULL);
+  
+  PurpleConvChatBuddyFlags flags = purple_conv_chat_user_get_flags (chat, name);
+  
+  if (status == tgl_typing_typing) {
+    flags |= PURPLE_CBFLAGS_TYPING;
+  } else {
+    flags &= ~PURPLE_CBFLAGS_TYPING;
+  }
+  
+  purple_conv_chat_user_set_flags(chat, name, flags);
+}
+
 void tgprpl_kick_from_chat (PurpleConnection *gc, int id, const char *who) {
   debug ("tgprpl_kick_from_chat()");
   
@@ -300,7 +357,7 @@ void tgprpl_chat_join (PurpleConnection *gc, GHashTable *data) {
         tgp_channel_load (gc_get_tls (gc), P, tgp_chat_on_loaded_channel_full_joining, NULL);
       }
     } else {
-      warning ("Cannot join chat %d, peer not found...", tgl_get_peer_id (P->id));
+      warning ("Cannot join chat %d, peer not found...", atoi (value));
       purple_serv_got_join_chat_failed (gc, data);
     }
     return;
